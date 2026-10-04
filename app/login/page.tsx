@@ -45,9 +45,7 @@ export default function LoginPage() {
 
       const role = profile.role;
 
-      // 3. Set cookies for Middleware Edge Protection
-      document.cookie = `auth_token=${authData.session.access_token}; path=/; max-age=86400; SameSite=Lax`;
-      document.cookie = `user_role=${role}; path=/; max-age=86400; SameSite=Lax`;
+      // The Supabase session lives in its own cookies (@supabase/ssr); the role is never stored client-side.
 
       // 4. Redirect based on assigned role
       switch (role) {

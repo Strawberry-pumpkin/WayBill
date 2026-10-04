@@ -1,0 +1,597 @@
+/* Driver design tokens and components, ported from the Designathon prototype. Everything is scoped to .drv-app. */
+
+.drv-app {
+  /* palette */
+  --paper: #FAFAF8;
+  --white: #FFFFFF;
+  --sunken: #F4F4F0;
+  --grey-100: #EDEDE9;
+  --grey-200: #EAEAE6;
+  --grey-300: #DEDEDA;
+  --grey-400: #C9C9C4;
+  --grey-600: #5A5A56;
+  --grey-700: #444440;
+  --ink: #121212;
+  --yellow: #FFDD00;
+  --yellow-tint: #FFF8CC;
+  --blue: #1A5FD0;
+  --blue-text: #12408F;
+  --blue-tint: #E4EDFB;
+  --red: #C8271B;
+  --red-text: #A01C13;
+  --red-tint: #FBE6E4;
+
+  /* surfaces */
+  --surface-page: var(--paper);
+  --surface-card: var(--white);
+  --surface-sunken: var(--sunken);
+  --surface-inverted: var(--ink);
+  --surface-brand: var(--yellow);
+
+  /* text */
+  --text-primary: var(--ink);
+  --text-secondary: var(--grey-600);
+  --text-inverted: #F2F2EF;
+  --text-onbrand: var(--ink);
+
+  /* border */
+  --border-hairline: var(--grey-300);
+  --border-control: var(--grey-400);
+  --border-emphasis: var(--ink);
+
+  /* status */
+  --status-onplan-fill: var(--blue-tint);
+  --status-onplan-text: var(--blue-text);
+  --status-onplan-mark: var(--blue);
+  --status-deferred-fill: var(--yellow);
+  --status-deferred-text: var(--ink);
+  --status-deferred-mark: var(--ink);
+  --status-deferred-row: var(--yellow-tint);
+  --status-late-fill: var(--red-tint);
+  --status-late-text: var(--red-text);
+  --status-late-mark: var(--red);
+  --status-delivered-fill: var(--grey-200);
+  --status-delivered-text: var(--grey-700);
+  --status-delivered-mark: var(--grey-600);
+
+  /* type */
+  --font-sans: var(--font-drv), "Schibsted Grotesk", system-ui, -apple-system, sans-serif;
+
+  /* spacing */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-14: 56px;
+  --space-18: 72px;
+
+  /* radius */
+  --radius-block: 0px;
+  --radius-sm: 6px;
+  --radius-control: 8px;
+  --radius-md: 10px;
+  --radius-card: 12px;
+  --radius-pill: 999px;
+
+  /* borders */
+  --border-w-hairline: 1px;
+  --border-w-emphasis: 2px;
+
+  /* shadow */
+  --shadow-popover: 0 4px 16px rgba(18, 18, 18, 0.12);
+  --shadow-modal: 0 16px 48px rgba(18, 18, 18, 0.20);
+
+  /* size */
+  --size-chip: 28px;
+  --size-control-height: 46px;
+  --size-control-touch: 56px;
+  --size-touch-min: 44px;
+
+  /* focus */
+  --focus-ring: 0 0 0 3px rgba(26, 95, 208, 0.45);
+}
+
+.drv-app, .drv-app * { box-sizing: border-box; }
+
+.drv-app {
+  margin: 0;
+  font-family: var(--font-sans);
+  color: var(--text-primary);
+  background: var(--surface-page);
+}
+
+.drv-app a { text-decoration: none; color: inherit; }
+
+.drv-app button { font-family: var(--font-sans); }
+
+/* ---------- Type ---------- */
+.drv-app .t-caption { font-size: 13px; line-height: 19px; font-weight: 400; }
+.drv-app .t-label { font-size: 14px; line-height: 20px; font-weight: 500; }
+.drv-app .t-ui { font-size: 15px; line-height: 20px; font-weight: 500; }
+.drv-app .t-body { font-size: 16px; line-height: 25px; font-weight: 400; }
+.drv-app .t-data { font-size: 16px; line-height: 22px; font-weight: 500; font-variant-numeric: tabular-nums; }
+.drv-app .t-metric { font-size: 22px; line-height: 26px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.drv-app .t-section { font-size: 24px; line-height: 28px; font-weight: 700; letter-spacing: -0.02em; margin: 0; }
+.drv-app .t-title { font-size: 26px; line-height: 28px; font-weight: 900; letter-spacing: -0.03em; margin: 0; }
+.drv-app .t-heading { font-size: 32px; line-height: 34px; font-weight: 900; letter-spacing: -0.03em; margin: 0; }
+.drv-app .t-secondary { color: var(--text-secondary); }
+
+/* ---------- Icons ---------- */
+.drv-app .icon { display: inline-flex; flex-shrink: 0; }
+.drv-app .icon svg { display: block; }
+
+/* ---------- Buttons ---------- */
+.drv-app .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  height: var(--size-control-touch);
+  padding: 0 var(--space-6);
+  border-radius: var(--radius-control);
+  font-size: 15px;
+  line-height: 20px;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.drv-app .btn:focus-visible { box-shadow: var(--focus-ring); outline: none; }
+.drv-app .btn-primary { background: var(--surface-brand); color: var(--text-onbrand); }
+.drv-app .btn-secondary { background: var(--surface-card); color: var(--text-primary); border: var(--border-w-hairline) solid var(--border-control); }
+.drv-app .btn-ghost { background: transparent; color: var(--text-primary); }
+.drv-app .btn-block { width: 100%; }
+.drv-app .btn[disabled] { opacity: 0.45; cursor: not-allowed; }
+
+/* ---------- Status chip ---------- */
+.drv-app .chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-pill);
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  font-family: var(--font-sans);
+}
+.drv-app .chip .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.drv-app .chip-onplan { background: var(--status-onplan-fill); color: var(--status-onplan-text); }
+.drv-app .chip-onplan .dot { background: var(--status-onplan-mark); }
+.drv-app .chip-deferred { background: var(--status-deferred-fill); color: var(--status-deferred-text); }
+.drv-app .chip-deferred .dot { background: var(--status-deferred-mark); }
+.drv-app .chip-late { background: var(--status-late-fill); color: var(--status-late-text); }
+.drv-app .chip-late .dot { background: var(--status-late-mark); }
+.drv-app .chip-delivered { background: var(--status-delivered-fill); color: var(--status-delivered-text); }
+.drv-app .chip-delivered .dot { background: var(--status-delivered-mark); }
+.drv-app .chip-neutral { background: var(--surface-card); color: var(--text-secondary); border: var(--border-w-hairline) solid var(--border-control); }
+.drv-app .chip-active { background: var(--ink); color: var(--text-inverted); }
+
+/* ---------- Cards / surfaces ---------- */
+.drv-app .card {
+  background: var(--surface-card);
+  border: var(--border-w-hairline) solid var(--border-hairline);
+  border-radius: var(--radius-card);
+}
+
+.drv-app .stat-card {
+  background: var(--surface-card);
+  border: var(--border-w-hairline) solid var(--border-hairline);
+  border-radius: var(--radius-card);
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+/* ---------- Delivery list card ---------- */
+.drv-app .delivery-card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  background: var(--surface-card);
+  border: var(--border-w-hairline) solid var(--border-hairline);
+  border-radius: var(--radius-card);
+  cursor: pointer;
+}
+.drv-app .delivery-card:hover { border-color: var(--border-control); }
+.drv-app .delivery-card .time-col {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  width: 64px;
+  flex-shrink: 0;
+}
+.drv-app .delivery-card .divider { width: 1px; align-self: stretch; background: var(--border-hairline); flex-shrink: 0; }
+.drv-app .delivery-card .info-col { display: flex; flex-direction: column; gap: 4px; min-width: 0; flex: 1 1 auto; }
+.drv-app .delivery-card .info-row { display: flex; align-items: center; gap: var(--space-1); color: var(--text-secondary); font-size: 13px; }
+.drv-app .delivery-card .info-row span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.drv-app .delivery-card .trailing { display: flex; align-items: center; gap: var(--space-3); flex-shrink: 0; }
+.drv-app .delivery-card .name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ---------- Search + filter ---------- */
+.drv-app .search-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  height: var(--size-control-height);
+  padding: 0 var(--space-4);
+  border-radius: var(--radius-control);
+  background: var(--surface-card);
+  border: var(--border-w-hairline) solid var(--border-control);
+}
+.drv-app .search-bar input {
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: var(--font-sans);
+  font-size: 16px;
+  color: var(--text-primary);
+  width: 100%;
+}
+.drv-app .search-bar input::placeholder { color: var(--text-secondary); }
+.drv-app .filter-row { display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; }
+
+/* ---------- Input field ---------- */
+.drv-app .field { display: flex; flex-direction: column; gap: var(--space-2); }
+.drv-app .field label { font-size: 14px; font-weight: 500; color: var(--text-secondary); }
+.drv-app .field input,
+.drv-app .field textarea {
+  border: var(--border-w-hairline) solid var(--border-control);
+  border-radius: var(--radius-control);
+  padding: 0 var(--space-4);
+  height: var(--size-control-height);
+  font-family: var(--font-sans);
+  font-size: 16px;
+  color: var(--text-primary);
+  background: var(--surface-card);
+  outline: none;
+}
+.drv-app .field input:focus,
+.drv-app .field textarea:focus { box-shadow: var(--focus-ring); border-color: var(--blue); }
+.drv-app .field textarea { padding: var(--space-3) var(--space-4); height: auto; resize: none; line-height: 22px; }
+
+/* ---------- Photo tile ---------- */
+.drv-app .photo-tile {
+  width: 140px;
+  height: 140px;
+  border-radius: var(--radius-md);
+  background: var(--surface-sunken);
+  border: 2px dashed var(--border-control);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  color: var(--text-secondary);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.drv-app .photo-tile.filled {
+  border-style: solid;
+  border-color: var(--border-hairline);
+  background: var(--grey-200);
+  color: var(--text-primary);
+}
+
+/* ---------- Offline banner ---------- */
+.drv-app .offline-banner {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-control);
+  background: var(--status-deferred-fill);
+  color: var(--status-deferred-text);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* ---------- Timeline ---------- */
+.drv-app .timeline { display: flex; flex-direction: column; }
+.drv-app .timeline-step { display: flex; gap: var(--space-3); }
+.drv-app .timeline-step .rail { display: flex; flex-direction: column; align-items: center; width: 32px; flex-shrink: 0; }
+.drv-app .timeline-step .dot {
+  width: 32px; height: 32px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.drv-app .timeline-step .line { width: 2px; flex: 1 1 auto; min-height: 24px; background: var(--border-hairline); }
+.drv-app .timeline-step .dot-done { background: var(--status-delivered-mark); color: var(--white); }
+.drv-app .timeline-step .dot-current { background: var(--surface-brand); border: 2px solid var(--border-emphasis); box-shadow: var(--focus-ring); color: var(--text-onbrand); }
+.drv-app .timeline-step .dot-upcoming { background: var(--surface-card); border: var(--border-w-hairline) solid var(--border-control); color: var(--text-secondary); }
+.drv-app .timeline-step .body { padding-bottom: var(--space-6); flex: 1 1 auto; min-width: 0; }
+
+/* ---------- Nav ---------- */
+.drv-app .nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-2);
+  color: var(--text-secondary);
+  cursor: pointer;
+  background: none;
+  border: none;
+  font-family: var(--font-sans);
+}
+.drv-app .nav-item .t-caption { color: var(--text-secondary); }
+.drv-app .nav-item.active { color: var(--text-primary); }
+.drv-app .nav-item.active .t-caption { color: var(--text-primary); font-weight: 500; }
+
+.drv-app .side-nav {
+  width: 88px;
+  flex-shrink: 0;
+  background: var(--surface-card);
+  border-right: var(--border-w-hairline) solid var(--border-hairline);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-6);
+  padding-top: var(--space-6);
+}
+
+.drv-app .bottom-nav {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: var(--space-2) 0;
+  background: var(--surface-card);
+  border-top: var(--border-w-hairline) solid var(--border-hairline);
+  flex-shrink: 0;
+}
+
+.drv-app .logo-mark {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-control);
+  background: var(--surface-brand);
+  color: var(--text-onbrand);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.drv-app .avatar {
+  border-radius: 50%;
+  background: var(--grey-200);
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+.drv-app .top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-4) var(--space-6);
+  background: var(--surface-card);
+  border-bottom: var(--border-w-hairline) solid var(--border-hairline);
+  flex-shrink: 0;
+}
+.drv-app .top-bar.compact { padding: var(--space-3) var(--space-4); }
+
+.drv-app .back-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--text-secondary);
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  width: fit-content;
+}
+
+/* ---------- Map placeholder ---------- */
+.drv-app .map-placeholder {
+  border-radius: var(--radius-card);
+  background: var(--surface-sunken);
+  border: var(--border-w-hairline) solid var(--border-hairline);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  color: var(--text-secondary);
+}
+
+/* ---------- Route number ---------- */
+.drv-app .route-num {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+  flex-shrink: 0;
+  background: var(--surface-sunken);
+  color: var(--text-secondary);
+  border: var(--border-w-hairline) solid var(--border-control);
+}
+.drv-app .route-num.current { background: var(--surface-brand); color: var(--text-onbrand); border-color: var(--border-emphasis); }
+.drv-app .route-num.done { background: var(--status-delivered-mark); color: var(--white); border: none; }
+
+/* ---------- Radio option (issue reasons) ---------- */
+.drv-app .radio-option {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border-radius: var(--radius-control);
+  border: var(--border-w-hairline) solid var(--border-control);
+  background: var(--surface-card);
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+  font-family: var(--font-sans);
+}
+.drv-app .radio-option .ring {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: var(--border-w-emphasis) solid var(--border-control);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.drv-app .radio-option.selected { border-color: var(--border-emphasis); box-shadow: var(--focus-ring); }
+.drv-app .radio-option.selected .ring { border-color: var(--ink); }
+.drv-app .radio-option.selected .ring::after { content: ""; width: 10px; height: 10px; border-radius: 50%; background: var(--ink); }
+
+/* ---------- Profile row ---------- */
+.drv-app .profile-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-4) 0;
+  border-bottom: var(--border-w-hairline) solid var(--border-hairline);
+}
+.drv-app .profile-row:last-child { border-bottom: none; }
+
+/* ---------- Empty / status state ---------- */
+.drv-app .status-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--space-4);
+}
+.drv-app .status-icon-circle {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* ---------- Trip context bar ---------- */
+.drv-app .trip-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+  padding: var(--space-3) var(--space-4);
+  background: var(--surface-sunken);
+  border: var(--border-w-hairline) solid var(--border-hairline);
+  border-radius: var(--radius-control);
+}
+.drv-app .trip-bar .item { display: flex; flex-direction: column; gap: 2px; }
+.drv-app .trip-bar .divider-v { width: 1px; align-self: stretch; background: var(--border-hairline); }
+
+/* ---------- Held-over / model-risk tags ---------- */
+.drv-app .tag-held {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--status-late-text);
+  background: var(--status-late-fill);
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  width: fit-content;
+}
+.drv-app .risk-note { font-size: 12px; color: var(--red-text); display: flex; align-items: center; gap: 4px; }
+.drv-app .temp-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  border: var(--border-w-hairline) solid var(--border-control);
+  color: var(--text-secondary);
+  width: fit-content;
+}
+.drv-app .temp-chip.chilled { color: var(--blue-text); border-color: var(--blue-tint); background: var(--blue-tint); }
+
+/* ---------- Sync queue ---------- */
+.drv-app .sync-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  background: var(--surface-card);
+  border: var(--border-w-hairline) solid var(--border-hairline);
+  border-radius: var(--radius-card);
+}
+.drv-app .sync-item .spin {
+  animation: drv-sync-spin 1.1s linear infinite;
+}
+@keyframes drv-sync-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+.drv-app .sync-summary {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border-radius: var(--radius-control);
+}
+.drv-app .sync-summary.pending { background: var(--status-deferred-fill); color: var(--status-deferred-text); }
+.drv-app .sync-summary.done { background: var(--status-delivered-fill); color: var(--status-delivered-text); }
+
+
+/* ---------- app shell (phone first; centred column on larger screens) ---------- */
+.drv-app { min-height: 100dvh; background: var(--grey-100); display: flex; justify-content: center; }
+.drv-app .shell { width: 100%; max-width: 520px; min-height: 100dvh; background: var(--surface-page); display: flex; flex-direction: column; position: relative; }
+.drv-app .shell > .content { flex: 1; display: flex; flex-direction: column; gap: var(--space-4); padding: var(--space-4); padding-bottom: var(--space-6); }
+.drv-app .shell > .centered { flex: 1; display: flex; flex-direction: column; justify-content: center; padding: var(--space-4); }
+.drv-app .bottom-nav { position: sticky; bottom: 0; padding-bottom: env(safe-area-inset-bottom); z-index: 5; }
+.drv-app .top-bar { position: sticky; top: 0; z-index: 5; gap: var(--space-3); }
+.drv-app .top-bar > div, .drv-app .top-bar .row { display: flex; align-items: center; gap: var(--space-3); }
+.drv-app .top-bar .title { flex: 1; text-align: center; }
+.drv-app .avatar { width: 36px; height: 36px; }
+.drv-app .nav-item { display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 64px; min-height: var(--size-touch-min); justify-content: center; color: var(--text-secondary); }
+.drv-app .nav-item.active { color: var(--text-primary); }
+.drv-app .nav-item .badge { position: absolute; transform: translate(14px, -6px); min-width: 18px; height: 18px; padding: 0 5px; border-radius: 999px; background: var(--yellow); color: var(--ink); font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; }
+.drv-app .nav-item .iconwrap { position: relative; display: inline-flex; }
+.drv-app .stack { display: flex; flex-direction: column; gap: var(--space-3); }
+.drv-app .row-between { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); }
+.drv-app .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-3); }
+.drv-app .trip-bar { display: flex; flex-direction: column; gap: var(--space-2); }
+.drv-app .trip-bar > div { display: flex; justify-content: space-between; gap: var(--space-3); }
+.drv-app .offline-banner { display: flex; align-items: center; gap: var(--space-2); }
+.drv-app .offline-banner a { text-decoration: underline; font-weight: 700; }
+.drv-app .delivery-card { display: flex; gap: var(--space-3); margin-bottom: var(--space-3); min-height: var(--size-touch-min); }
+.drv-app .delivery-card .time-col { width: 56px; display: flex; flex-direction: column; }
+.drv-app .delivery-card .info-col { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.drv-app .delivery-card .info-row { display: flex; align-items: center; gap: 6px; }
+.drv-app .delivery-card .trailing { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+.drv-app .filter-row { display: flex; gap: var(--space-2); flex-wrap: wrap; margin-top: var(--space-2); }
+.drv-app .search-bar { display: flex; align-items: center; gap: var(--space-2); }
+.drv-app .photo-grid { display: flex; gap: var(--space-3); }
+.drv-app .photo-tile { position: relative; overflow: hidden; cursor: pointer; flex: 1; min-height: 120px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; text-align: center; }
+.drv-app .photo-tile img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.drv-app .photo-tile .cap { position: relative; background: rgba(255,255,255,.9); padding: 2px 8px; border-radius: 6px; }
+.drv-app .sigpad { width: 100%; height: 160px; touch-action: none; display: block; background: var(--white); border-radius: var(--radius-card); border: 2px dashed var(--border-control); }
+.drv-app .sigpad.filled { border: 2px solid var(--ink); }
+.drv-app .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.drv-app .error-note { background: var(--red-tint); color: var(--red-text); border-radius: var(--radius-control); padding: var(--space-3); }
+.drv-app .btn { text-decoration: none; }
+.drv-app textarea, .drv-app input { font-family: inherit; }
+.drv-app .chip { cursor: pointer; }
+.drv-app .spin { animation: drv-spin 1s linear infinite; }
+@keyframes drv-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .drv-app .spin { animation: none; } }
+.drv-app .delivery-card .name { white-space: normal; overflow: visible; text-overflow: clip; }
+.drv-app .delivery-card .trailing { flex-shrink: 0; }
