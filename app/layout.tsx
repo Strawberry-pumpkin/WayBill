@@ -1,21 +1,23 @@
-import type { Metadata } from "next";
-import "./globals.css";
+// app/layout.tsx
+import { AuthProvider } from "@/context/AuthContext";
+import React from "react";
 
-export const metadata: Metadata = {
-  title: "Waypoint Dispatch — Dispatcher",
+export const metadata = {
+  title: "Waypoint Dispatch",
+  description: "Logistics and Fleet Management System",
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html lang="en">
-      <head>
-        <link
-          rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;700;900&display=swap"
-        />
-      </head>
-      <body style={{ margin: 0, padding: 0, minHeight: "100vh" }}>
-        {children}
+      <body>
+        <AuthProvider>
+          {children}
+        </AuthProvider>
       </body>
     </html>
   );

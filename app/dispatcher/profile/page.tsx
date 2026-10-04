@@ -1,26 +1,53 @@
 // app/dispatcher/profile/page.tsx
 "use client";
 
-export default function ProfilePage() {
-  const profileData = {
-    name: "Imesha Fernando",
-    role: "Dispatcher",
-    depot: "Peliyagoda depot",
-    details: [
-      { label: "Depot", value: "Peliyagoda" },
-      { label: "Brand", value: "Waypoint Fresh" },
-      { label: "District", value: "Colombo" },
-      { label: "Fleet", value: "4 vehicles · 4 drivers on today's plan" },
-      { label: "Shift", value: "Mon–Sat · orders close before cutoff" },
-    ],
-  };
+import { useAuth } from "@/context/AuthContext";
+import { useRouter } from "next/navigation";
 
+export default function ProfilePage() {
+  const { user, loading, logout } = useAuth();
+  const router = useRouter();
+
+  // Avatar එක සඳහා Name Initials සදාගැනීම
   const getInitials = (name: string) => {
+    if (!name) return "U";
     return name
       .split(" ")
       .map((part) => part[0])
       .join("")
       .toUpperCase();
+  };
+
+  // Sign out handler
+  const handleSignOut = async () => {
+    try {
+      await logout();
+      router.push("/login");
+    } catch (error) {
+      console.error("Sign out failed:", error);
+    }
+  };
+
+  if (loading) {
+    return <div style={{ color: "var(--g600)", padding: "20px 0" }}>Loading profile...</div>;
+  }
+
+  if (!user) {
+    return <div style={{ color: "var(--red-text)", padding: "20px 0" }}>User session not found.</div>;
+  }
+
+  // Auth Context එකෙන් dynamic data ගැනීම (නැතහොත් fallback values පාවිච්චි කිරීම)
+  const profileData = {
+    name: user.name || "Dispatcher User",
+    role: user.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : "Dispatcher",
+    depot: "Peliyagoda depot",
+    details: [
+      { label: "Email", value: user.email },
+      { label: "Depot", value: "Peliyagoda" },
+      { label: "Brand", value: "Waypoint Fresh" },
+      { label: "District", value: "Colombo" },
+      { label: "Shift", value: "Mon–Sat · orders close before cutoff" },
+    ],
   };
 
   return (
@@ -130,7 +157,7 @@ export default function ProfilePage() {
       <div>
         <button
           type="button"
-          onClick={() => console.log("Sign out clicked")}
+          onClick={handleSignOut}
           style={{
             background: "var(--ink, #111827)",
             color: "var(--paper, #ffffff)",

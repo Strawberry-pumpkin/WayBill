@@ -3,23 +3,63 @@
 
 import "./tokens.css";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import ThemeToggle from "@/components/ThemeToggle"; // <--- Import ThemeToggle
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect } from "react";
+import { useAuth } from "@/context/AuthContext";
+import ThemeToggle from "@/components/ThemeToggle";
+import {
+  LayoutDashboard,
+  ClipboardList,
+  Shuffle,
+  History as HistoryIcon,
+  Gauge,
+  Users,
+  CircleUserRound,
+  type LucideIcon,
+} from "lucide-react";
 
-const NAV = [
-  { href: "/dispatcher/dashboard", label: "Dashboard", icon: "▦" },
-  { href: "/dispatcher/orders", label: "Orders", icon: "☰" },
-  { href: "/dispatcher/plan", label: "Allocate", icon: "⇄" },
-  { href: "/dispatcher/capacity", label: "Capacity", icon: "▥" },
-  { href: "/dispatcher/drivers", label: "Drivers", icon: "↻" },
-  { href: "/dispatcher/profile", label: "Profile", icon: "●" },
+const NAV: { href: string; label: string; icon: LucideIcon }[] = [
+  { href: "/dispatcher/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/dispatcher/orders", label: "Orders", icon: ClipboardList },
+  { href: "/dispatcher/plan", label: "Allocate", icon: Shuffle },
+  { href: "/dispatcher/history", label: "History", icon: HistoryIcon },
+  { href: "/dispatcher/capacity", label: "Capacity", icon: Gauge },
+  { href: "/dispatcher/drivers", label: "Drivers", icon: Users },
+  { href: "/dispatcher/profile", label: "Profile", icon: CircleUserRound },
 ];
 
 export default function DispatcherLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
+  const { user, loading } = useAuth();
+
+  // Authentication Guard Logic
+  useEffect(() => {
+    if (!loading) {
+      if (!user) {
+        router.replace("/login");
+      } else if (user.role !== "dispatcher" && user.role !== "admin") {
+        router.replace("/unauthorized");
+      }
+    }
+  }, [user, loading, router]);
 
   const currentNavItem = NAV.find((item) => pathname?.startsWith(item.href));
   const pageTitle = currentNavItem ? currentNavItem.label : "";
+
+  // Session check වන තුරු UI එක load වීම වළක්වයි
+  if (loading) {
+    return (
+      <div style={{ display: "grid", placeItems: "center", minHeight: "100vh", background: "var(--paper)" }}>
+        <p style={{ fontWeight: 600, color: "var(--g600)" }}>Checking authentication...</p>
+      </div>
+    );
+  }
+
+  // User verified නැත්නම් UI එක පෙන්වන්නේ නැත
+  if (!user || (user.role !== "dispatcher" && user.role !== "admin")) {
+    return null;
+  }
 
   return (
     <div
@@ -68,6 +108,7 @@ export default function DispatcherLayout({ children }: { children: React.ReactNo
         </div>
         {NAV.map((item) => {
           const active = pathname?.startsWith(item.href);
+          const Icon = item.icon;
           return (
             <Link
               key={item.href}
@@ -76,7 +117,7 @@ export default function DispatcherLayout({ children }: { children: React.ReactNo
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
-                gap: 2,
+                gap: 4,
                 width: "100%",
                 padding: "8px 2px",
                 borderRadius: 8,
@@ -87,7 +128,7 @@ export default function DispatcherLayout({ children }: { children: React.ReactNo
                 textDecoration: "none",
               }}
             >
-              <b style={{ fontSize: 18, lineHeight: 1 }}>{item.icon}</b>
+              <Icon size={18} strokeWidth={2} />
               {item.label}
             </Link>
           );
@@ -95,52 +136,50 @@ export default function DispatcherLayout({ children }: { children: React.ReactNo
       </nav>
 
       <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", width: "100%" }}>
-      <header
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 12,
-          padding: "12px 24px",
-          background: "var(--white)",
-          borderBottom: "1px solid var(--g300)",
-          position: "sticky",
-          top: 0,
-          zIndex: 4,
-        }}
-      >
-        <div style={{ flex: 1, display: "flex", alignItems: "center", gap: 8 }}>
-          <span style={{ fontWeight: 700, fontSize: 16 }}>Waypoint Dispatch</span>
-          {pageTitle && (
-            <>
-              <span style={{ color: "var(--g400)", fontWeight: 400 }}>/</span>
-              <span style={{ fontWeight: 600, fontSize: 15, color: "var(--g600)" }}>
-                {pageTitle}
-              </span>
-            </>
-          )}
-        </div>
-
-        {/* Theme Toggle Button */}
-        <ThemeToggle />
-
-        <Link
-          href="/dispatcher/profile"
+        <header
           style={{
-            width: 36,
-            height: 36,
-            borderRadius: "50%",
-            background: "var(--yellow)",
-            color: "var(--on-yellow)",
-            display: "grid",
-            placeItems: "center",
-            fontWeight: 700,
-            fontSize: 13,
-            textDecoration: "none",
+            display: "flex",
+            alignItems: "center",
+            gap: 12,
+            padding: "12px 24px",
+            background: "var(--white)",
+            borderBottom: "1px solid var(--g300)",
+            position: "sticky",
+            top: 0,
+            zIndex: 4,
           }}
         >
-          IF
-        </Link>
-      </header>
+          <div style={{ flex: 1, display: "flex", alignItems: "center", gap: 8 }}>
+            <span style={{ fontWeight: 700, fontSize: 16 }}>Waypoint Dispatch</span>
+            {pageTitle && (
+              <>
+                <span style={{ color: "var(--g400)", fontWeight: 400 }}>/</span>
+                <span style={{ fontWeight: 600, fontSize: 15, color: "var(--g600)" }}>
+                  {pageTitle}
+                </span>
+              </>
+            )}
+          </div>
+
+          <ThemeToggle />
+
+          <Link
+            href="/dispatcher/profile"
+            aria-label="Profile"
+            style={{
+              width: 36,
+              height: 36,
+              borderRadius: "50%",
+              background: "var(--yellow)",
+              color: "var(--on-yellow)",
+              display: "grid",
+              placeItems: "center",
+              textDecoration: "none",
+            }}
+          >
+            <CircleUserRound size={20} strokeWidth={2} />
+          </Link>
+        </header>
 
         <main style={{ padding: 24, width: "100%", boxSizing: "border-box" }}>
           {children}

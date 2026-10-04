@@ -1,12 +1,53 @@
 "use client";
 
-import { useState } from "react";
-import { DRIVERS } from "@/lib/dispatcher/data";
+import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabase/client";
+
+interface DriverRow {
+  id: string;
+  driver: string;
+  vehicleId: string;
+  lastSyncedMin: number;
+  queuedRecords: number;
+}
 
 export default function DriversPage() {
+  const [drivers, setDrivers] = useState<DriverRow[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [simulateOffline, setSimulateOffline] = useState(false);
 
-  const activeDrivers = DRIVERS.map((d, i) => {
+  useEffect(() => {
+    async function load() {
+      const { data, error: err } = await supabase
+        .from("drivers")
+        .select("id, driver_name, vehicle_id, last_synced_at, queued_records")
+        .order("driver_name", { ascending: true });
+
+      if (err) {
+        setError(err.message);
+        setLoading(false);
+        return;
+      }
+
+      const now = Date.now();
+      setDrivers(
+        (data ?? []).map((d: any) => ({
+          id: String(d.id),
+          driver: d.driver_name,
+          vehicleId: d.vehicle_id,
+          // Computed from the real timestamp, so this is accurate whenever
+          // the page loads instead of a stored number going stale.
+          lastSyncedMin: Math.max(0, Math.round((now - new Date(d.last_synced_at).getTime()) / 60000)),
+          queuedRecords: d.queued_records ?? 0,
+        }))
+      );
+      setLoading(false);
+    }
+    load();
+  }, []);
+
+  const activeDrivers = drivers.map((d, i) => {
     const offline = simulateOffline && i >= 2;
     return {
       ...d,
@@ -22,7 +63,6 @@ export default function DriversPage() {
 
   return (
     <div style={{ maxWidth: 1180, width: "100%", margin: "0 auto", padding: 24 }}>
-      {/* Page Header */}
       <h1
         style={{
           fontSize: 32,
@@ -47,7 +87,12 @@ export default function DriversPage() {
         Real-time status of driver mobile synchronization. Track connected drivers, offline buffer queues, and last active timestamps.
       </p>
 
-      {/* Simulation Toggle Controls */}
+      {error && (
+        <p role="alert" style={{ color: "var(--red-text, #b91c1c)", fontSize: 14, marginBottom: 16 }}>
+          Could not load drivers: {error}
+        </p>
+      )}
+
       <div style={{ marginBottom: 16 }}>
         <button
           onClick={() => setSimulateOffline(!simulateOffline)}
@@ -66,27 +111,25 @@ export default function DriversPage() {
         </button>
       </div>
 
-      {/* KPI Metrics Summary Grid */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 12, marginBottom: 16 }}>
         <div className="kpi">
           <div className="kpi-label">Synced drivers</div>
           <div className="kpi-val" style={{ color: "var(--green, #0A783C)" }}>
-            {syncedCount} / {DRIVERS.length}
+            {loading ? "—" : `${syncedCount} / ${drivers.length}`}
           </div>
         </div>
         <div className="kpi">
           <div className="kpi-label">Offline drivers</div>
           <div className="kpi-val" style={{ color: offlineCount > 0 ? "var(--red, #C82323)" : "var(--ink, #121212)" }}>
-            {offlineCount}
+            {loading ? "—" : offlineCount}
           </div>
         </div>
         <div className="kpi">
           <div className="kpi-label">Queued records</div>
-          <div className="kpi-val">{totalQueued}</div>
+          <div className="kpi-val">{loading ? "—" : totalQueued}</div>
         </div>
       </div>
 
-      {/* Table Card */}
       <div className="card" style={{ padding: 0, overflow: "hidden" }}>
         <div style={{ overflowX: "auto" }}>
           <table style={{ width: "100%", minWidth: 560, borderCollapse: "collapse" }}>
@@ -100,22 +143,36 @@ export default function DriversPage() {
               </tr>
             </thead>
             <tbody>
-              {activeDrivers.map((d) => (
-                <tr key={d.driver} style={d.offline ? { background: "var(--ytint, #FFF8CC)" } : undefined}>
-                  <td style={td}>
-                    <b>{d.driver}</b>
-                  </td>
-                  <td style={td}>{d.vehicleId}</td>
-                  <td style={td}>{d.lastSynced} min ago</td>
-                  <td style={td}>{d.queued}</td>
-                  <td style={td}>
-                    <span className={`pill ${d.offline ? "pill-deferred" : "pill-ok"}`}>
-                      <span className="dot" />
-                      {d.offline ? "Offline · possibly stale" : "Synced"}
-                    </span>
+              {loading ? (
+                <tr>
+                  <td style={td} colSpan={5}>
+                    Loading drivers…
                   </td>
                 </tr>
-              ))}
+              ) : activeDrivers.length === 0 ? (
+                <tr>
+                  <td style={td} colSpan={5}>
+                    No drivers found.
+                  </td>
+                </tr>
+              ) : (
+                activeDrivers.map((d) => (
+                  <tr key={d.id} style={d.offline ? { background: "var(--ytint, #FFF8CC)" } : undefined}>
+                    <td style={td}>
+                      <b>{d.driver}</b>
+                    </td>
+                    <td style={td}>{d.vehicleId}</td>
+                    <td style={td}>{d.lastSynced} min ago</td>
+                    <td style={td}>{d.queued}</td>
+                    <td style={td}>
+                      <span className={`pill ${d.offline ? "pill-deferred" : "pill-ok"}`}>
+                        <span className="dot" />
+                        {d.offline ? "Offline · possibly stale" : "Synced"}
+                      </span>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>

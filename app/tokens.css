@@ -1,0 +1,106 @@
+/* Waypoint design tokens — dispatcher module.
+   Import once in app/dispatcher/layout.tsx. Scoped to :root so it can
+   coexist with other roles' tokens if they differ later. */
+
+:root {
+  --paper: #FAFAF8;
+  --white: #FFFFFF;
+  --sunken: #F4F4F0;
+  --g200: #EAEAE6;
+  --g300: #DEDEDA;
+  --g400: #C9C9C4;
+  --g600: #5A5A56;
+  --g700: #444440;
+  --ink: #121212;
+  --on-yellow: #121212;
+
+  --yellow: #FFDD00;
+  --yellow-tint: #FFF8CC;
+  --blue: #1A5FD0;
+  --blue-text: #12408F;
+  --blue-tint: #E4EDFB;
+  --red: #C8271B;
+  --red-text: #A01C13;
+  --red-tint: #FBE6E4;
+  --green: #1F9D55;
+  --green-text: #15803D;
+  --green-tint: #E6F4EA;
+
+  --font-sans: "Schibsted Grotesk", system-ui, -apple-system, sans-serif;
+}
+
+[data-theme="dark"] {
+  --paper: #121212;
+  --white: #1e1e1e;
+  --sunken: #27272a;
+  --g200: #2f2f33;
+  --g300: #374151;
+  --g400: #6b7280;
+  --g600: #9ca3af;
+  --g700: #d4d4d8;
+  --ink: #f9fafb;
+  --on-yellow: #000000;
+
+  --yellow: #facc15;
+  --yellow-tint: #3f2e05;
+
+  --blue: #60a5fa;
+  --blue-text: #93c5fd;
+  --blue-tint: #15233d;
+
+  --red: #f87171;
+  --red-text: #fca5a5;
+  --red-tint: #3a1212;
+
+  --green: #4ade80;
+  --green-text: #86efac;
+  --green-tint: #0f2e1c;
+}
+
+/* Status language — shared across every role, keep identical if you add others */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 4px 10px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.pill .dot { width: 6px; height: 6px; border-radius: 999px; flex: none; }
+
+.pill-onPlan { background: var(--blue-tint); color: var(--blue-text); }
+.pill-onPlan .dot { background: var(--blue); }
+
+.pill-deferred { background: var(--yellow); color: var(--on-yellow); }
+.pill-deferred .dot { background: var(--on-yellow); }
+
+.pill-late { background: var(--red-tint); color: var(--red-text); }
+.pill-late .dot { background: var(--red); }
+
+.pill-delivered { background: var(--g200); color: var(--g700); }
+.pill-delivered .dot { background: var(--g600); }
+
+.pill-ok { background: var(--green-tint); color: var(--green-text); }
+.pill-ok .dot { background: var(--green); }
+
+.pill-short { background: var(--red-tint); color: var(--red-text); }
+.pill-short .dot { background: var(--red); }
+
+.tag {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 2px 7px;
+  border-radius: 5px;
+  margin-right: 4px;
+  margin-top: 4px;
+  border: 1px solid var(--g300);
+  color: var(--g700);
+  background: var(--sunken);
+}
+.tag-warn { background: var(--red-tint); color: var(--red-text); border-color: var(--red-tint); }
+.tag-chill { background: var(--blue-tint); color: var(--blue-text); border-color: var(--blue-tint); }

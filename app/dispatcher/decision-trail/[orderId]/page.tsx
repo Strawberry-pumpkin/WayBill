@@ -41,9 +41,6 @@ export default function DecisionTrailPage() {
 
   return (
     <div>
-      <div style={{ fontSize: 13, marginBottom: 10 }}>
-        <Link href="/dispatcher/orders" style={{ textDecoration: "underline" }}>Orders</Link> / Decision trail
-      </div>
       <h1 style={{ fontSize: 32, fontWeight: 900, letterSpacing: "-0.03em", margin: "0 0 6px" }}>Decision trail · {orderRef}</h1>
       <p style={{ color: "var(--g600)", marginBottom: 16, maxWidth: 640 }}>Every allocation and deferral for this order, with who made it and why.</p>
 

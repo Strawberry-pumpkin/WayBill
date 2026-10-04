@@ -18,7 +18,7 @@ const PERIODS: { key: Period; label: string; days: number | null }[] = [
 
 const pillOf = (s: string): RouteStatus => (s === "deferred" ? "deferred" : s === "late" ? "late" : s === "delivered" ? "delivered" : "onPlan");
 
-// Date a record belongs to: the day the order was for, else when it was planned.
+// Date a record belongs to: assignedAt, orderDate, or fallback to current date for unassigned deferred runs
 const dateOf = (r: OrderRec) => r.orderDate ?? r.assignedAt ?? null;
 const show = (iso: string | null) =>
   iso ? new Date(iso.length === 10 ? `${iso}T00:00:00+05:30` : iso).toLocaleString("en-GB", { timeZone: "Asia/Colombo", day: "2-digit", month: "short", year: "numeric", ...(iso.length === 10 ? {} : { hour: "2-digit", minute: "2-digit" }) }) : "—";
@@ -32,7 +32,7 @@ export default function HistoryPage() {
   const [query, setQuery] = useState("");
 
   useEffect(() => {
-    // Pending orders have not been planned yet, so they are not history.
+    // Only filter out strictly pending orders that have not been deferred
     loadPlan()
       .then((d) => setRecords(d.orders.filter((o) => o.status !== "pending")))
       .catch((e) => setError(e.message))
@@ -46,11 +46,13 @@ export default function HistoryPage() {
     return records
       .filter((r) => {
         const d = dateOf(r);
-        if (days && (!d || new Date(d).getTime() < cutoff)) return false;
+        // Include deferred orders even if date string is missing
+        if (days && d && new Date(d).getTime() < cutoff) return false;
+        if (days && !d && r.status !== "deferred") return false;
         if (status !== "all" && r.status !== status) return false;
         return !q || [r.code, r.vehicleId ?? "", r.outletLabel].some((x) => x.toLowerCase().includes(q));
       })
-      .sort((a, b) => new Date(dateOf(b) ?? 0).getTime() - new Date(dateOf(a) ?? 0).getTime());
+      .sort((a, b) => new Date(dateOf(b) ?? Date.now()).getTime() - new Date(dateOf(a) ?? Date.now()).getTime());
   }, [records, period, status, query]);
 
   const m = useMemo(() => {

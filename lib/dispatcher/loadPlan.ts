@@ -73,11 +73,16 @@ export async function loadPlan(): Promise<PlanData> {
       chilled: norm(o.temp_class ?? o.temp_requirement) === "chilled", kg: Number(o.weight_kg) || 0, m3: Number(o.volume_m3) || 0,
       deferredYesterday: 0, daysSinceServed: 0, label: "",
     };
+
+    // Explicitly check for deferred status or defer reason presence
+    const rawStatus = norm(o.status || "pending");
+    const isDeferred = rawStatus === "deferred" || Boolean(o.defer_reason);
+    const calculatedStatus = a ? norm(a.status || "assigned") : isDeferred ? "deferred" : rawStatus;
+
     return {
       id: String(o.id),
       code,
-      // A deferred order that was later assigned is shown as assigned, so trust the assignment row first.
-      status: a ? norm(a.status || "assigned") : norm(o.status || "pending"),
+      status: calculatedStatus,
       vehicleId: a ? String(a.vehicle_id) : null,
       tripId: a ? Number(a.trip_id) || 1 : null,
       seq: a ? Number(a.stop_sequence) || 0 : 0,
@@ -88,7 +93,7 @@ export async function loadPlan(): Promise<PlanData> {
       kg: core.kg,
       m3: core.m3,
       deferReason: o.defer_reason ?? "",
-      orderDate: o.order_date ?? null,
+      orderDate: o.order_date ?? o.created_at ?? null,
       assignedAt: a?.assigned_at ?? null,
       core,
     };
