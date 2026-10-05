@@ -1,14 +1,6 @@
 -- Shared security helpers. Runs first.
 
--- The caller's role, read from profiles. SECURITY DEFINER so policies can use it without
--- recursing into profiles' own RLS. Returns null for anonymous callers.
-create or replace function public.app_role()
-returns text
-language sql stable security definer set search_path = ''
-as $$ select p.role::text from public.profiles p where p.id = auth.uid() $$;
-
-revoke all on function public.app_role() from public, anon;
-grant execute on function public.app_role() to authenticated;
+-- public.app_role() is defined in 20261003000000_profiles_drivers.sql (it needs the profiles table).
 
 -- Per-user fixed-window rate limiter used by the Next.js route handlers.
 create table if not exists public.rate_limits (

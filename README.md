@@ -113,9 +113,9 @@ Phone-first driver app under `/driver/*` (dashboard, stop detail, progress, proo
 ### Setup
 
 1. `cp .env.example .env.local` and fill in the Supabase URL and anon key (they are intentionally empty in git).
-2. Apply `supabase/migrations/*.sql` in order (SQL editor or `supabase db push`).
-   `20261004000003_driver_cross_role.sql` reads other roles' tables and must be reviewed against the live schema first (see its header).
-3. Seed accounts: `SUPABASE_URL=… SUPABASE_SERVICE_ROLE_KEY=… SEED_PASSWORD=… node scripts/seed-users.mjs`, then add a `drivers` row (`id` = the driver's auth id, `vehicle_id`).
+2. Apply `supabase/migrations/*.sql` in order (they create `profiles` and `drivers` first) (SQL editor or `supabase db push`).
+   `20261004000003_driver_cross_role.sql` reads other roles' tables and must be reviewed against the live schema first (see its header). `supabase/inspect_schema.sql` is a read-only script that dumps the columns, constraints and policies of the tables it depends on.
+3. Seed accounts: `SUPABASE_URL=… SUPABASE_SERVICE_ROLE_KEY=… SEED_PASSWORD=… node scripts/seed-users.mjs`, it also creates the driver's `drivers` row; then assign the vehicle (`update drivers set vehicle_id = 'VEH014' where driver_name = '…'`, one driver per vehicle).
 
 ### How access is enforced (three independent layers)
 

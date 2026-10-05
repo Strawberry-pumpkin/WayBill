@@ -1,7 +1,7 @@
 // Creates the four demo accounts (Auth user + profiles row). Run once per project:
 //   SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... node scripts/seed-users.mjs
 // The service-role key bypasses RLS and must never be committed or used by app code: this script only.
-// To make a driver usable you also need a `drivers` row (id = that user's auth id, vehicle_id = 'VEHxxx').
+// The driver also gets a `drivers` row; assign their vehicle afterwards: update drivers set vehicle_id = 'VEH014' where ...
 import { createClient } from "@supabase/supabase-js";
 
 const url = process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -49,5 +49,17 @@ for (const u of users) {
     id = data.user.id;
   }
   const { error: profileError } = await supabase.from("profiles").upsert({ id, email: u.email, name: u.name, role: u.role });
-  console.log(profileError ? `Profile error for ${u.email}: ${profileError.message}` : `OK ${u.email} (${u.role})`);
+  if (profileError) {
+    console.log(`Profile error for ${u.email}: ${profileError.message}`);
+    continue;
+  }
+  if (u.role === "driver") {
+    // vehicle_id is left untouched here: assign it afterwards (update drivers set vehicle_id = 'VEH014' ...).
+    const { error: driverError } = await supabase.from("drivers").upsert({ id, driver_name: u.name });
+    if (driverError) {
+      console.log(`Driver row error for ${u.email}: ${driverError.message}`);
+      continue;
+    }
+  }
+  console.log(`OK ${u.email} (${u.role})`);
 }
