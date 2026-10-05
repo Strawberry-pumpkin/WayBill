@@ -1,53 +1,65 @@
-import { createClient } from '@supabase/supabase-js';
+// Creates the four demo accounts (Auth user + profiles row). Run once per project:
+//   SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... node scripts/seed-users.mjs
+// The service-role key bypasses RLS and must never be committed or used by app code: this script only.
+// The driver also gets a `drivers` row; assign their vehicle afterwards: update drivers set vehicle_id = 'VEH014' where ...
+import { createClient } from "@supabase/supabase-js";
 
-// .env.local එකේ තියෙන variables හෝ direct values ලබා දෙන්න
-const SUPABASE_URL = 'https://qxljaoymutzebiesrxrd.supabase.co';
-const SUPABASE_SERVICE_ROLE_KEY = 'sb_publishable_rxGgG_SWVWdLEd5i6bybtw_6WO4mP2S'; // Dashboard -> Settings -> API -> service_role key
+const url = process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL;
+const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+if (!url || !key) {
+  console.error("Set SUPABASE_URL (or NEXT_PUBLIC_SUPABASE_URL) and SUPABASE_SERVICE_ROLE_KEY. See .env.example.");
+  process.exit(1);
+}
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
-  auth: {
-    autoRefreshToken: false,
-    persistSession: false
-  }
-});
+const supabase = createClient(url, key, { auth: { autoRefreshToken: false, persistSession: false } });
 
 const users = [
-  { email: 'dispatcher@waypoint.lk', password: 'Pass123!', name: 'Nimal Perera', role: 'dispatcher' },
-  { email: 'driver@waypoint.lk', password: 'Pass123!', name: 'Sunil Fernando', role: 'driver' },
-  { email: 'outlet@waypoint.lk', password: 'Pass123!', name: 'Kamal Silva', role: 'outlet_manager' },
-  { email: 'admin@waypoint.lk', password: 'Pass123!', name: 'System Admin', role: 'admin' },
+  { email: "dispatcher@waypoint.lk", name: "Nimal Perera", role: "dispatcher" },
+  { email: "driver@waypoint.lk", name: "Sunil Fernando", role: "driver" },
+  { email: "outlet@waypoint.lk", name: "Kamal Silva", role: "outlet_manager" },
+  { email: "admin@waypoint.lk", name: "System Admin", role: "admin" },
 ];
 
-async function seed() {
-  for (const u of users) {
-    // 1. Native Admin API එකෙන් GoTrue Auth user හදන්න
-    const { data: userData, error: createError } = await supabase.auth.admin.createUser({
-      email: u.email,
-      password: u.password,
-      email_confirm: true,
-    });
+const password = process.env.SEED_PASSWORD;
+if (!password || password.length < 12) {
+  console.error("Set SEED_PASSWORD (12+ characters). It is not stored anywhere.");
+  process.exit(1);
+}
 
-    if (createError) {
-      console.error(`Error creating ${u.email}:`, createError.message);
-      continue;
-    }
-
-    // 2. Profile table එකට Role එක insert කරන්න
-    const { error: profileError } = await supabase
-      .from('profiles')
-      .upsert({
-        id: userData.user.id,
-        email: u.email,
-        name: u.name,
-        role: u.role,
-      });
-
-    if (profileError) {
-      console.error(`Error adding profile for ${u.email}:`, profileError.message);
-    } else {
-      console.log(`Successfully created user & profile for: ${u.email}`);
-    }
+async function findUserId(email) {
+  for (let page = 1; ; page++) {
+    const { data, error } = await supabase.auth.admin.listUsers({ page, perPage: 200 });
+    if (error) throw error;
+    const hit = data.users.find((u) => u.email?.toLowerCase() === email);
+    if (hit) return hit.id;
+    if (data.users.length < 200) return null;
   }
 }
 
-seed();
+for (const u of users) {
+  let id;
+  const { data, error } = await supabase.auth.admin.createUser({ email: u.email, password, email_confirm: true });
+  if (error) {
+    id = await findUserId(u.email);
+    if (!id) {
+      console.error(`Error creating ${u.email}: ${error.message}`);
+      continue;
+    }
+  } else {
+    id = data.user.id;
+  }
+  const { error: profileError } = await supabase.from("profiles").upsert({ id, email: u.email, name: u.name, role: u.role });
+  if (profileError) {
+    console.log(`Profile error for ${u.email}: ${profileError.message}`);
+    continue;
+  }
+  if (u.role === "driver") {
+    // vehicle_id is left untouched here: assign it afterwards (update drivers set vehicle_id = 'VEH014' ...).
+    const { error: driverError } = await supabase.from("drivers").upsert({ user_id: id, driver_name: u.name }, { onConflict: "user_id" });
+    if (driverError) {
+      console.log(`Driver row error for ${u.email}: ${driverError.message}`);
+      continue;
+    }
+  }
+  console.log(`OK ${u.email} (${u.role})`);
+}
