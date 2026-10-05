@@ -114,8 +114,8 @@ Phone-first driver app under `/driver/*` (dashboard, stop detail, progress, proo
 
 1. `cp .env.example .env.local` and fill in the Supabase URL and anon key (they are intentionally empty in git).
 2. Apply `supabase/migrations/*.sql` in order (they create `profiles` and `drivers` first) (SQL editor or `supabase db push`).
-   `20261004000003_driver_cross_role.sql` reads other roles' tables and must be reviewed against the live schema first (see its header). `supabase/inspect_schema.sql` is a read-only script that dumps the columns, constraints and policies of the tables it depends on.
-3. Seed accounts: `SUPABASE_URL=… SUPABASE_SERVICE_ROLE_KEY=… SEED_PASSWORD=… node scripts/seed-users.mjs`, it also creates the driver's `drivers` row; then assign the vehicle (`update drivers set vehicle_id = 'VEH014' where driver_name = '…'`, one driver per vehicle).
+   The migrations were written against the live schema (inspected 2026-10-05) and tested on a stub of it. `supabase/inspect_schema.sql` is a read-only script that dumps the columns, constraints and policies of the tables it depends on.
+3. Seed accounts: `SUPABASE_URL=… SUPABASE_SERVICE_ROLE_KEY=… SEED_PASSWORD=… node scripts/seed-users.mjs`, it also creates the driver's `drivers` row (linked to the login through `drivers.user_id`). If `drivers` rows already exist, link them: `update drivers set user_id = (select id from profiles where email = 'driver@waypoint.lk') where driver_name = '…'`. Then assign the vehicle (`update drivers set vehicle_id = 'VEH014' where driver_name = '…'`, one driver per vehicle).
 
 ### How access is enforced (three independent layers)
 
@@ -133,5 +133,7 @@ Work is saved to IndexedDB first (with its real capture time), then synced in or
 
 ### Open items
 
+- Today's run = assigned orders on the driver's vehicle whose `orders.delivery_date` is today (Sri Lanka time), so a delivery day must be seeded.
+- `orders.created_by` is new (nullable): the store-manager module must set it on insert, otherwise managers can't see driver records for those orders.
 - Loader hand-off: `public.loader_release_status()` is an empty placeholder; the app treats `null` as "not connected yet".
 - Late-risk (`pred_late_prob`) is intentionally not shown.

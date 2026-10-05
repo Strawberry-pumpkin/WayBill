@@ -55,7 +55,7 @@ for (const u of users) {
   }
   if (u.role === "driver") {
     // vehicle_id is left untouched here: assign it afterwards (update drivers set vehicle_id = 'VEH014' ...).
-    const { error: driverError } = await supabase.from("drivers").upsert({ id, driver_name: u.name });
+    const { error: driverError } = await supabase.from("drivers").upsert({ user_id: id, driver_name: u.name }, { onConflict: "user_id" });
     if (driverError) {
       console.log(`Driver row error for ${u.email}: ${driverError.message}`);
       continue;
